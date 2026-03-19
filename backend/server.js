@@ -20,12 +20,18 @@ connectDB();
 const app = express();
 app.disable('x-powered-by');
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://smri29net.vercel.app',
-  'https://smri29.net',
-  process.env.FRONTEND_URL,
-].filter(Boolean);
+const allowedOrigins = Array.from(
+  new Set(
+    [
+      'http://localhost:5173',
+      process.env.FRONTEND_URL,
+      ...(process.env.FRONTEND_URLS || '')
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean),
+    ].filter(Boolean)
+  )
+);
 
 const corsOptions = {
   origin(origin, callback) {

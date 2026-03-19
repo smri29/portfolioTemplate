@@ -23,42 +23,16 @@ import Contact from '../components/Contact';
 import Hero from '../components/Hero';
 import Navbar from '../components/Navbar';
 import Skills from '../components/Skills';
+import { useSiteContext } from '../context/useSiteContext';
+import { buildExitTransition, buildFadeUpVariant, buildStaggerVariant } from '../theme/motion';
 
 const MotionSection = motion.section;
 const MotionDiv = motion.div;
 const MotionArticle = motion.article;
 
-const SECTION_VARIANTS = {
-  hidden: { opacity: 0, y: 22 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: 'easeOut' } },
-};
-
-const HEADER_VARIANTS = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' } },
-};
-
 const PROJECT_CATEGORIES = ['AI/ML', 'MERN', 'Flutter', 'Others'];
 const CERT_CATEGORIES = ['AI/ML', 'Kaggle', 'Research', 'Professional', 'Others'];
 const CERTIFICATE_PREVIEW_LIMIT = 3;
-
-const CARD_STAGGER = {
-  hidden: { opacity: 0, y: 16 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.4,
-      ease: 'easeOut',
-      staggerChildren: 0.05,
-    },
-  },
-};
-
-const CARD_ITEM = {
-  hidden: { opacity: 0, y: 12 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.28, ease: 'easeOut' } },
-};
 
 const formatMonthLabel = (value) => {
   if (!value) {
@@ -130,6 +104,8 @@ const formatPublicationDate = (value) => {
 };
 
 const Home = () => {
+  const { siteProfile, appearanceSettings } = useSiteContext();
+  const motionPreset = appearanceSettings.motionPreset;
   const [research, setResearch] = useState([]);
   const [projects, setProjects] = useState([]);
   const [certificates, setCertificates] = useState([]);
@@ -140,6 +116,13 @@ const Home = () => {
 
   const [activeProjectCategory, setActiveProjectCategory] = useState(null);
   const [expandedProjects, setExpandedProjects] = useState({});
+  const sectionVariants = useMemo(() => buildFadeUpVariant(motionPreset, 22, 0.55), [motionPreset]);
+  const headerVariants = useMemo(() => buildFadeUpVariant(motionPreset, 16, 0.45), [motionPreset]);
+  const cardStagger = useMemo(
+    () => buildStaggerVariant(motionPreset, { distance: 16, duration: 0.4, childStagger: 0.05 }),
+    [motionPreset]
+  );
+  const cardItem = useMemo(() => buildFadeUpVariant(motionPreset, 12, 0.28), [motionPreset]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -221,9 +204,9 @@ const Home = () => {
   return (
     <div className="relative min-h-screen overflow-x-hidden text-slate-100">
       <div className="pointer-events-none fixed inset-0 subtle-grid opacity-[0.1]" />
-      <div className="pointer-events-none fixed inset-x-0 top-0 h-28 bg-gradient-to-b from-cyan-300/10 to-transparent" />
-      <div className="pointer-events-none fixed -left-24 -top-24 h-80 w-80 rounded-full bg-cyan-300/15 blur-[100px]" />
-      <div className="pointer-events-none fixed -bottom-24 -right-16 h-72 w-72 rounded-full bg-amber-300/10 blur-[95px]" />
+      <div className="pointer-events-none fixed inset-x-0 top-0 h-28 bg-gradient-to-b from-white/8 to-transparent" />
+      <div className="pointer-events-none fixed -left-24 -top-24 h-80 w-80 rounded-full bg-white/8 blur-[100px]" />
+      <div className="pointer-events-none fixed -bottom-24 -right-16 h-72 w-72 rounded-full bg-slate-200/5 blur-[95px]" />
 
       <Navbar />
 
@@ -233,14 +216,14 @@ const Home = () => {
 
         <MotionSection
           id="experience"
-          variants={SECTION_VARIANTS}
+          variants={sectionVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.15 }}
           className="section-shell zone-olive border-t border-white/5 px-6 py-24 md:px-8"
         >
           <div className="mx-auto max-w-6xl">
-            <MotionDiv variants={HEADER_VARIANTS} className="mb-10 flex items-center gap-3">
+            <MotionDiv variants={headerVariants} className="mb-10 flex items-center gap-3">
               <Briefcase className="text-cyan-300" size={28} />
               <h2 className="section-title">
                 Work <span className="text-cyan-200">Experience</span>
@@ -294,14 +277,14 @@ const Home = () => {
 
         <MotionSection
           id="projects"
-          variants={SECTION_VARIANTS}
+          variants={sectionVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.15 }}
           className="section-shell zone-blue border-t border-white/5 px-6 py-24 md:px-8"
         >
           <div className="mx-auto max-w-6xl">
-            <MotionDiv variants={HEADER_VARIANTS} className="mb-10 flex items-center gap-3">
+            <MotionDiv variants={headerVariants} className="mb-10 flex items-center gap-3">
               <Code className="text-cyan-300" size={28} />
               <h2 className="section-title">
                 Technical <span className="text-cyan-200">Projects</span>
@@ -333,10 +316,10 @@ const Home = () => {
                   {activeProjectCategory && (
                     <MotionDiv
                       key={activeProjectCategory}
-                      variants={CARD_STAGGER}
+                      variants={cardStagger}
                       initial="hidden"
                       animate="visible"
-                      exit={{ opacity: 0, y: -10, transition: { duration: 0.2, ease: 'easeOut' } }}
+                      exit={buildExitTransition(motionPreset, 0.2)}
                     >
                       <div className="mb-5 flex items-center gap-3">
                         <span className="section-kicker">Selected Category</span>
@@ -358,7 +341,7 @@ const Home = () => {
                           return (
                             <MotionArticle
                               key={item._id}
-                              variants={CARD_ITEM}
+                              variants={cardItem}
                               className="glass-card card-sheen group relative overflow-hidden rounded-[24px] border-white/10 bg-slate-900/58 p-3.5 shadow-[0_16px_42px_rgba(6,10,22,0.18)] transition duration-300 hover:-translate-y-1 hover:border-cyan-300/30 hover:bg-slate-900/78 md:p-4"
                             >
                               <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-br from-cyan-300/10 via-transparent to-amber-200/5 opacity-70 transition duration-300 group-hover:opacity-100" />
@@ -503,14 +486,14 @@ const Home = () => {
 
         <MotionSection
           id="research"
-          variants={SECTION_VARIANTS}
+          variants={sectionVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.15 }}
           className="section-shell zone-blue border-t border-white/5 px-6 py-24 md:px-8"
         >
           <div className="mx-auto max-w-6xl">
-            <MotionDiv variants={HEADER_VARIANTS} className="mb-10 flex items-center gap-3">
+            <MotionDiv variants={headerVariants} className="mb-10 flex items-center gap-3">
               <BookOpen className="text-cyan-300" size={28} />
               <h2 className="section-title">
                 Research <span className="text-cyan-200">Publications</span>
@@ -526,7 +509,7 @@ const Home = () => {
               return (
                 <MotionDiv
                   key={label}
-                  variants={CARD_STAGGER}
+                  variants={cardStagger}
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true, amount: 0.15 }}
@@ -552,7 +535,7 @@ const Home = () => {
                       return (
                         <MotionArticle
                           key={item._id}
-                          variants={CARD_ITEM}
+                          variants={cardItem}
                           className="glass-card card-sheen group relative overflow-hidden rounded-[28px] border-white/10 bg-slate-900/60 p-6 shadow-[0_18px_55px_rgba(6,10,22,0.22)] transition duration-300 hover:-translate-y-1 hover:border-cyan-300/30 hover:bg-slate-900/78"
                         >
                           <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-br from-cyan-300/10 via-transparent to-amber-200/5 opacity-70 transition duration-300 group-hover:opacity-100" />
@@ -615,14 +598,14 @@ const Home = () => {
 
         <MotionSection
           id="certifications"
-          variants={SECTION_VARIANTS}
+          variants={sectionVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.15 }}
           className="section-shell zone-blue border-t border-white/5 px-6 py-24 md:px-8"
         >
           <div className="mx-auto max-w-6xl">
-            <MotionDiv variants={HEADER_VARIANTS} className="mb-10 flex items-center gap-3">
+            <MotionDiv variants={headerVariants} className="mb-10 flex items-center gap-3">
               <Award className="text-cyan-300" size={28} />
               <h2 className="section-title">
                 Professional <span className="text-cyan-200">Certifications</span>
@@ -638,7 +621,7 @@ const Home = () => {
               return (
                 <MotionDiv
                   key={category}
-                  variants={CARD_STAGGER}
+                  variants={cardStagger}
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true, amount: 0.15 }}
@@ -657,7 +640,7 @@ const Home = () => {
                     {previewItems.map((item) => (
                       <MotionArticle
                         key={item._id}
-                        variants={CARD_ITEM}
+                        variants={cardItem}
                         className="glass-card card-sheen border-white/10 p-5 transition duration-300 hover:-translate-y-1 hover:border-cyan-300/35"
                       >
                         <div className="flex items-start justify-between gap-3">
@@ -691,14 +674,14 @@ const Home = () => {
 
         <MotionSection
           id="education"
-          variants={SECTION_VARIANTS}
+          variants={sectionVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.15 }}
           className="section-shell zone-blue border-t border-white/5 px-6 py-24 md:px-8"
         >
           <div className="mx-auto max-w-6xl">
-            <MotionDiv variants={HEADER_VARIANTS} className="mb-10 flex items-center gap-3">
+            <MotionDiv variants={headerVariants} className="mb-10 flex items-center gap-3">
               <GraduationCap className="text-cyan-300" size={28} />
               <h2 className="section-title">
                 Education <span className="text-cyan-200">Background</span>
@@ -739,14 +722,14 @@ const Home = () => {
 
         <MotionSection
           id="hobbies"
-          variants={SECTION_VARIANTS}
+          variants={sectionVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.15 }}
           className="section-shell zone-blue border-t border-white/5 px-6 py-24 md:px-8"
         >
           <div className="mx-auto max-w-6xl">
-            <MotionDiv variants={HEADER_VARIANTS} className="mb-10 flex items-center gap-3">
+            <MotionDiv variants={headerVariants} className="mb-10 flex items-center gap-3">
               <Heart className="text-cyan-300" size={28} />
               <h2 className="section-title">
                 Interests and <span className="text-cyan-200">Hobbies</span>
@@ -757,7 +740,7 @@ const Home = () => {
               <p className="text-sm text-slate-400">No hobbies added yet.</p>
             ) : (
               <MotionDiv
-                variants={CARD_STAGGER}
+                variants={cardStagger}
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true, amount: 0.15 }}
@@ -766,7 +749,7 @@ const Home = () => {
                 {hobbies.map((hobby) => (
                   <MotionArticle
                     key={hobby._id}
-                    variants={CARD_ITEM}
+                    variants={cardItem}
                     className="glass-card card-sheen group relative overflow-hidden rounded-[24px] border-white/10 bg-slate-900/60 p-5 shadow-[0_18px_50px_rgba(6,10,22,0.18)] transition duration-300 hover:-translate-y-1 hover:border-cyan-300/30 hover:bg-slate-900/78"
                   >
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-br from-cyan-300/10 via-transparent to-amber-200/5 opacity-70 transition duration-300 group-hover:opacity-100" />
@@ -796,7 +779,18 @@ const Home = () => {
       <ChatWidget />
 
       <footer className="relative z-20 border-t border-white/10 bg-slate-900/75 px-6 py-10 text-center text-sm text-slate-500">
-        <p>&copy; 2026 Shah Mohammad Rizvi. Built for professional outreach.</p>
+        <p>{siteProfile.footerText || `(c) ${new Date().getFullYear()} ${siteProfile.fullName}. All rights reserved.`}</p>
+        <p className="mt-2 text-xs text-slate-500">
+          Built by{' '}
+          <a
+            href="https://linkedin.com/in/smri29/"
+            target="_blank"
+            rel="noreferrer"
+            className="text-slate-300 transition hover:text-white"
+          >
+            Shah Mohammad Rizvi
+          </a>
+        </p>
       </footer>
     </div>
   );

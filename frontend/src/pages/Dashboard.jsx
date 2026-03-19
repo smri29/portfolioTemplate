@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import AIKnowledgeManager from '../components/dashboard/AIKnowledgeManager';
+import AppearanceManager from '../components/dashboard/AppearanceManager';
 import CertificateManager from '../components/dashboard/CertificateManager';
 import EducationManager from '../components/dashboard/EducationManager';
 import ExperienceManager from '../components/dashboard/ExperienceManager';
@@ -7,18 +8,21 @@ import HeroManager from '../components/dashboard/HeroManager';
 import HobbyManager from '../components/dashboard/HobbyManager';
 import IntroductionManager from '../components/dashboard/IntroductionManager';
 import MessageInbox from '../components/dashboard/MessageInbox';
+import ProfileManager from '../components/dashboard/ProfileManager';
 import ProjectManager from '../components/dashboard/ProjectManager';
 import ResearchManager from '../components/dashboard/ResearchManager';
 import Sidebar from '../components/dashboard/Sidebar';
 import SkillManager from '../components/dashboard/SkillManager';
 
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState('research');
+  const [activeTab, setActiveTab] = useState('profile');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const tabs = ['hero', 'introduction', 'ai', 'research', 'projects', 'experience', 'education', 'certificates', 'skills', 'hobbies', 'messages'];
+  const tabs = ['profile', 'appearance', 'hero', 'introduction', 'ai', 'research', 'projects', 'experience', 'education', 'certificates', 'skills', 'hobbies', 'messages'];
 
   const managerByTab = useMemo(
     () => ({
+      profile: <ProfileManager />,
+      appearance: <AppearanceManager />,
       hero: <HeroManager />,
       introduction: <IntroductionManager />,
       ai: <AIKnowledgeManager />,

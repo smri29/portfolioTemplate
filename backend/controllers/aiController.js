@@ -9,6 +9,7 @@ const Research = require('../models/Research');
 const Certificate = require('../models/Certificate');
 const Skill = require('../models/Skill');
 const Hobby = require('../models/Hobby');
+const SiteProfile = require('../models/SiteProfile');
 
 const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const MAX_PROMPT_LENGTH = 1200;
@@ -19,9 +20,9 @@ const genAI = process.env.GEMINI_API_KEY
   : null;
 
 const DEFAULT_AI_SETTINGS = {
-  assistantName: 'RAI',
-  assistantSubtitle: "Rizvi's personalized AI",
-  primaryGoal: 'Help recruiters, hiring managers, and collaborators evaluate Shah Mohammad Rizvi accurately.',
+  assistantName: 'Portfolio AI',
+  assistantSubtitle: 'The personalized assistant for this portfolio',
+  primaryGoal: 'Help visitors, recruiters, hiring managers, and collaborators understand this profile accurately.',
   currentRole: '',
   location: '',
   opportunityFocus: '',
@@ -38,7 +39,7 @@ const DEFAULT_AI_SETTINGS = {
     'Use the knowledge base as the source of truth. Do not invent roles, achievements, dates, links, metrics, or claims. If information is missing, say so clearly. Keep answers concise by default. Avoid markdown formatting such as headings, bold, italics, or code fences. For lists, use plain-text bullets starting with "-".',
   additionalKnowledge: '',
   fallbackReply:
-    "I'm currently updating my knowledge base. Please check Rizvi's profile sections or contact details for the latest information.",
+    "I'm currently updating my knowledge base. Please check the profile sections or contact details for the latest information.",
 };
 
 const normalizeString = (value, maxLength = 5000) => String(value ?? '').trim().slice(0, maxLength);
@@ -252,9 +253,19 @@ const buildKnowledgeBase = ({
   return sections.filter(Boolean).join('\n\n');
 };
 
+const getPublicAISettings = async (req, res) => {
+  const item = await AISettings.findOne().lean();
+  const settings = serializeAISettings(item);
+  res.json({
+    assistantName: settings.assistantName,
+    assistantSubtitle: settings.assistantSubtitle,
+  });
+};
+
 const fetchKnowledgeContext = async () => {
   const [
     settingsDoc,
+    siteProfile,
     hero,
     introduction,
     experience,
@@ -266,6 +277,7 @@ const fetchKnowledgeContext = async () => {
     hobbies,
   ] = await Promise.all([
     AISettings.findOne().lean(),
+    SiteProfile.findOne().lean(),
     HeroContent.findOne().lean(),
     Introduction.findOne().lean(),
     Experience.find().sort({ order: 1, createdAt: -1 }).lean(),
@@ -278,6 +290,7 @@ const fetchKnowledgeContext = async () => {
   ]);
 
   const settings = serializeAISettings(settingsDoc);
+  const profileName = siteProfile?.fullName ? `Profile Owner: ${siteProfile.fullName}` : '';
   const knowledgeBase = buildKnowledgeBase({
     settings,
     hero,
@@ -291,7 +304,7 @@ const fetchKnowledgeContext = async () => {
     hobbies,
   });
 
-  return { settings, knowledgeBase };
+  return { settings, knowledgeBase: [profileName, knowledgeBase].filter(Boolean).join('\n\n') };
 };
 
 const getAISettings = async (req, res) => {
@@ -389,4 +402,4 @@ const chatWithAI = async (req, res) => {
   }
 };
 
-module.exports = { chatWithAI, getAISettings, updateAISettings };
+module.exports = { chatWithAI, getAISettings, getPublicAISettings, updateAISettings };

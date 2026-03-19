@@ -2,14 +2,43 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import API from '../api/axios';
 import { toast } from 'react-toastify';
-import { Github, Linkedin, Mail, Send } from 'lucide-react';
+import {
+  Dribbble,
+  Facebook,
+  Github,
+  Globe,
+  Instagram,
+  Linkedin,
+  Mail,
+  MonitorPlay,
+  Send,
+  Sparkles,
+  Twitter,
+} from 'lucide-react';
+import { useSiteContext } from '../context/useSiteContext';
+import { buildTransition } from '../theme/motion';
 
 const MotionSection = motion.section;
 const MotionDiv = motion.div;
 
+const SOCIAL_ICON_MAP = {
+  website: Globe,
+  github: Github,
+  linkedin: Linkedin,
+  kaggle: Sparkles,
+  twitter: Twitter,
+  facebook: Facebook,
+  instagram: Instagram,
+  youtube: MonitorPlay,
+  dribbble: Dribbble,
+  behance: Dribbble,
+};
+
 const Contact = () => {
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [sending, setSending] = useState(false);
+  const { siteProfile, appearanceSettings } = useSiteContext();
+  const motionPreset = appearanceSettings.motionPreset;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -39,45 +68,45 @@ const Contact = () => {
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
+          transition={buildTransition(motionPreset, 0.45)}
           className="glass-card card-sheen border-white/10 p-8"
         >
-          <h2 className="section-title font-serif text-4xl">
-            Let&apos;s <span className="text-cyan-200">Connect</span>
-          </h2>
+          <h2 className="section-title font-serif text-4xl">{siteProfile.contactHeading || "Let's Connect"}</h2>
           <p className="mt-4 text-sm leading-relaxed text-slate-300">
-            I am open to AI/ML internships, research collaboration, and full-stack engineering opportunities.
-            Share your idea or role details and I will follow up.
+            {siteProfile.contactDescription}
           </p>
 
           <div className="mt-8 space-y-4 text-sm text-slate-300">
-            <a
-              href="mailto:smri29.ml@gmail.com"
-              className="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/35 px-4 py-3 transition hover:-translate-y-0.5 hover:border-cyan-300/40 hover:text-cyan-200"
-            >
-              <Mail size={16} className="text-cyan-300" />
-              smri29.ml@gmail.com
-            </a>
+            {siteProfile.contactEmail && (
+              <a
+                href={`mailto:${siteProfile.contactEmail}`}
+                className="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/35 px-4 py-3 transition hover:-translate-y-0.5 hover:border-cyan-300/40 hover:text-cyan-200"
+              >
+                <Mail size={16} className="text-cyan-300" />
+                {siteProfile.contactEmail}
+              </a>
+            )}
 
-            <div className="flex items-center gap-3 pt-2">
-              <a
-                href="https://www.linkedin.com/in/smri29"
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-2xl border border-white/10 bg-slate-900/35 p-3 transition hover:-translate-y-0.5 hover:border-cyan-300/40 hover:text-cyan-200"
-                aria-label="LinkedIn"
-              >
-                <Linkedin size={18} />
-              </a>
-              <a
-                href="https://github.com/smri29"
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-2xl border border-white/10 bg-slate-900/35 p-3 transition hover:-translate-y-0.5 hover:border-cyan-300/40 hover:text-cyan-200"
-                aria-label="GitHub"
-              >
-                <Github size={18} />
-              </a>
-            </div>
+            {siteProfile.socialLinks?.length > 0 && (
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                {siteProfile.socialLinks.map((link, index) => {
+                  const Icon = SOCIAL_ICON_MAP[link.iconKey] || Globe;
+
+                  return (
+                    <a
+                      key={link._id || `${link.label}-${index}`}
+                      href={link.url}
+                      target={link.iconKey === 'mail' ? undefined : '_blank'}
+                      rel={link.iconKey === 'mail' ? undefined : 'noreferrer'}
+                      className="rounded-2xl border border-white/10 bg-slate-900/35 p-3 transition hover:-translate-y-0.5 hover:border-cyan-300/40 hover:text-cyan-200"
+                      aria-label={link.label || link.iconKey}
+                    >
+                      <Icon size={18} />
+                    </a>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </MotionDiv>
 
@@ -85,7 +114,7 @@ const Contact = () => {
           initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
-          transition={{ delay: 0.08 }}
+          transition={buildTransition(motionPreset, 0.45, { delay: 0.08 })}
           className="glass-card relative overflow-hidden border-white/10 p-8"
         >
           <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-r from-cyan-300/10 via-white/0 to-amber-200/10" />

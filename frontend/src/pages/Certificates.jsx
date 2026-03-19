@@ -3,29 +3,13 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Award, ExternalLink } from 'lucide-react';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import API from '../api/axios';
+import { useSiteContext } from '../context/useSiteContext';
+import { buildFadeUpVariant, buildStaggerVariant, buildTransition } from '../theme/motion';
 
 const MotionSection = motion.section;
 const MotionArticle = motion.article;
 
 const CERT_CATEGORIES = ['AI/ML', 'Kaggle', 'Research', 'Professional', 'Others'];
-
-const SECTION_VARIANTS = {
-  hidden: { opacity: 0, y: 18 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.45,
-      ease: 'easeOut',
-      staggerChildren: 0.06,
-    },
-  },
-};
-
-const CARD_VARIANTS = {
-  hidden: { opacity: 0, y: 14 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
-};
 
 const getCategoryAnchor = (category) =>
   category
@@ -54,6 +38,13 @@ const Certificates = () => {
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
+  const { appearanceSettings } = useSiteContext();
+  const motionPreset = appearanceSettings.motionPreset;
+  const sectionVariants = useMemo(
+    () => buildStaggerVariant(motionPreset, { distance: 18, duration: 0.45, childStagger: 0.06 }),
+    [motionPreset]
+  );
+  const cardVariants = useMemo(() => buildFadeUpVariant(motionPreset, 14, 0.35), [motionPreset]);
 
   useEffect(() => {
     const fetchCertificates = async () => {
@@ -128,7 +119,7 @@ const Certificates = () => {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, ease: 'easeOut' }}
+            transition={buildTransition(motionPreset, 0.45)}
             className="glass-card mb-10 border-white/10 p-4 md:p-5"
           >
             <div className="flex flex-wrap gap-3">
@@ -158,7 +149,7 @@ const Certificates = () => {
                 <MotionSection
                   key={category}
                   id={getCategoryAnchor(category)}
-                  variants={SECTION_VARIANTS}
+                  variants={sectionVariants}
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true, amount: 0.1 }}
@@ -173,7 +164,7 @@ const Certificates = () => {
                     {items.map((item) => (
                       <MotionArticle
                         key={item._id}
-                        variants={CARD_VARIANTS}
+                        variants={cardVariants}
                         className="glass-card card-sheen border-white/10 p-5 transition duration-300 hover:-translate-y-1 hover:border-cyan-300/35"
                       >
                         <div className="flex items-start justify-between gap-3">

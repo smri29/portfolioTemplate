@@ -3,6 +3,8 @@ const Project = require('../models/Project');
 const Certificate = require('../models/Certificate');
 const Skill = require('../models/Skill');
 const Message = require('../models/Message');
+const SiteProfile = require('../models/SiteProfile');
+const AppearanceSettings = require('../models/AppearanceSettings');
 const HeroContent = require('../models/HeroContent');
 const Introduction = require('../models/Introduction');
 const Experience = require('../models/Experience');
@@ -17,6 +19,26 @@ const CERTIFICATE_CATEGORIES = new Set(['AI/ML', 'Kaggle', 'Research', 'Professi
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const MAX_HOME_CERTIFICATES_PER_CATEGORY = 3;
+const SOCIAL_ICON_KEYS = new Set([
+  'website',
+  'github',
+  'linkedin',
+  'kaggle',
+  'twitter',
+  'facebook',
+  'instagram',
+  'youtube',
+  'dribbble',
+  'behance',
+]);
+const APPEARANCE_PALETTE_KEYS = new Set([
+  'olive-teal-glass',
+  'obsidian-teal-glass',
+  'graphite-frost-glass',
+  'midnight-cobalt-glass',
+  'smoke-olive-glass',
+]);
+const MOTION_PRESET_KEYS = new Set(['cinematic', 'balanced', 'subtle', 'minimal', 'none']);
 
 const normalizeString = (value, maxLength = 5000) => String(value ?? '').trim().slice(0, maxLength);
 const normalizeBoolean = (value) => value === true || value === 'true' || value === 1 || value === '1' || value === 'on';
@@ -101,6 +123,19 @@ const isValidUrl = (value) => {
   }
 };
 
+const isValidAssetReference = (value) => {
+  const ref = normalizeString(value, 2048);
+  if (!ref) {
+    return true;
+  }
+
+  if (ref.startsWith('/')) {
+    return true;
+  }
+
+  return isValidUrl(ref);
+};
+
 const escapeHtml = (value) =>
   String(value)
     .replace(/&/g, '&amp;')
@@ -174,14 +209,14 @@ const serializeExperience = (item) => ({
 
 const DEFAULT_INTRODUCTION = {
   introLabel: 'Introduction',
-  headingPrimary: 'Research mindset,',
-  headingAccent: 'production execution.',
+  headingPrimary: 'Build a compelling',
+  headingAccent: 'professional story.',
   description:
-    'I design and deploy AI systems that solve practical problems. My focus spans model experimentation, data-centric pipelines, and scalable MERN-based interfaces. I prioritize clean architecture, measurable outcomes, and communication that keeps engineering teams aligned.',
+    'Use this section to explain your focus, strengths, and the kind of impact you create. Keep it clear, specific, and written in your own voice.',
   highlights: [
-    { title: 'Education', detail: 'BSc in CSE, IUBAT', iconKey: 'education', order: 0 },
-    { title: 'Research', detail: '7+ publications in ML and Computer Vision', iconKey: 'research', order: 1 },
-    { title: 'Leadership', detail: 'Founder and President, CollabCircle', iconKey: 'leadership', order: 2 },
+    { title: 'Education', detail: 'Add your degree, institution, or academic focus.', iconKey: 'education', order: 0 },
+    { title: 'Research', detail: 'Highlight publications, applied work, or subject expertise.', iconKey: 'research', order: 1 },
+    { title: 'Leadership', detail: 'Showcase leadership, ownership, or community building.', iconKey: 'leadership', order: 2 },
   ],
 };
 
@@ -203,11 +238,93 @@ const serializeIntroduction = (item) => ({
 });
 
 const DEFAULT_HERO_CONTENT = {
-  availabilityText: 'Open to Entry-Level Software & AI/ML Roles',
-  roleTitles: ['AI/ML Engineer', 'Researcher', 'Full-Stack Developer', 'Founder, CollabCircle'],
+  availabilityText: 'Open to relevant opportunities',
+  roleTitles: ['Your Title', 'Your Specialty', 'Your Focus Area'],
   summary:
-    'Building production-grade intelligence systems from model design to deployment. I focus on computer vision, practical deep learning, and reliable web platforms that create measurable impact.',
+    'Write a short, high-signal summary about what you build, what you specialize in, and the type of work or impact you want visitors to remember.',
 };
+
+const DEFAULT_SITE_PROFILE = {
+  siteLabel: 'Portfolio',
+  fullName: 'Your Name',
+  professionalTitle: 'Your Professional Title',
+  logoImageUrl: '',
+  heroImageUrl: '',
+  aboutImageUrl: '',
+  resumeUrl: '',
+  resumeFileName: 'resume.pdf',
+  contactEmail: '',
+  linkedinUrl: '',
+  githubUrl: '',
+  kaggleUrl: '',
+  socialLinks: [],
+  contactHeading: "Let's Connect",
+  contactDescription:
+    'Use this section to invite recruiters, collaborators, clients, or hiring managers to get in touch.',
+  footerText: '',
+  seoTitle: 'Portfolio Template',
+  seoDescription: 'A reusable portfolio template for developers, researchers, and professionals.',
+};
+
+const DEFAULT_APPEARANCE_SETTINGS = {
+  paletteKey: 'olive-teal-glass',
+  motionPreset: 'balanced',
+};
+
+const serializeSocialLinks = (item) => {
+  const directLinks = Array.isArray(item?.socialLinks)
+    ? item.socialLinks
+        .map((link, index) => ({
+          _id: link._id,
+          label: link.label || '',
+          iconKey: SOCIAL_ICON_KEYS.has(link.iconKey) ? link.iconKey : 'website',
+          url: link.url || '',
+          order: link.order ?? index,
+        }))
+        .filter((link) => link.url)
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    : [];
+
+  if (directLinks.length > 0) {
+    return directLinks;
+  }
+
+  const legacyLinks = [
+    item?.githubUrl ? { label: 'GitHub', iconKey: 'github', url: item.githubUrl, order: 0 } : null,
+    item?.linkedinUrl ? { label: 'LinkedIn', iconKey: 'linkedin', url: item.linkedinUrl, order: 1 } : null,
+    item?.kaggleUrl ? { label: 'Kaggle', iconKey: 'kaggle', url: item.kaggleUrl, order: 2 } : null,
+  ].filter(Boolean);
+
+  return legacyLinks;
+};
+
+const serializeSiteProfile = (item) => ({
+  siteLabel: item?.siteLabel || DEFAULT_SITE_PROFILE.siteLabel,
+  fullName: item?.fullName || DEFAULT_SITE_PROFILE.fullName,
+  professionalTitle: item?.professionalTitle || DEFAULT_SITE_PROFILE.professionalTitle,
+  logoImageUrl: item?.logoImageUrl || DEFAULT_SITE_PROFILE.logoImageUrl,
+  heroImageUrl: item?.heroImageUrl || DEFAULT_SITE_PROFILE.heroImageUrl,
+  aboutImageUrl: item?.aboutImageUrl || DEFAULT_SITE_PROFILE.aboutImageUrl,
+  resumeUrl: item?.resumeUrl || DEFAULT_SITE_PROFILE.resumeUrl,
+  resumeFileName: item?.resumeFileName || DEFAULT_SITE_PROFILE.resumeFileName,
+  contactEmail: item?.contactEmail || DEFAULT_SITE_PROFILE.contactEmail,
+  linkedinUrl: item?.linkedinUrl || DEFAULT_SITE_PROFILE.linkedinUrl,
+  githubUrl: item?.githubUrl || DEFAULT_SITE_PROFILE.githubUrl,
+  kaggleUrl: item?.kaggleUrl || DEFAULT_SITE_PROFILE.kaggleUrl,
+  socialLinks: serializeSocialLinks(item),
+  contactHeading: item?.contactHeading || DEFAULT_SITE_PROFILE.contactHeading,
+  contactDescription: item?.contactDescription || DEFAULT_SITE_PROFILE.contactDescription,
+  footerText: item?.footerText || DEFAULT_SITE_PROFILE.footerText,
+  seoTitle: item?.seoTitle || DEFAULT_SITE_PROFILE.seoTitle,
+  seoDescription: item?.seoDescription || DEFAULT_SITE_PROFILE.seoDescription,
+  updatedAt: item?.updatedAt,
+});
+
+const serializeAppearanceSettings = (item) => ({
+  paletteKey: item?.paletteKey || DEFAULT_APPEARANCE_SETTINGS.paletteKey,
+  motionPreset: item?.motionPreset || DEFAULT_APPEARANCE_SETTINGS.motionPreset,
+  updatedAt: item?.updatedAt,
+});
 
 const serializeHeroContent = (item) => ({
   availabilityText: item?.availabilityText || DEFAULT_HERO_CONTENT.availabilityText,
@@ -245,7 +362,7 @@ const uploadProjectImage = async (imageData) => {
   }
 
   const uploadResult = await cloudinary.uploader.upload(imageData, {
-    folder: 'smri29/projects',
+    folder: process.env.CLOUDINARY_FOLDER || 'portfolio-template/projects',
     resource_type: 'image',
   });
 
@@ -309,6 +426,106 @@ exports.reorderItems = async (req, res) => {
 exports.getResearch = async (req, res) => {
   const items = await Research.find().sort(getModelSort(Research)).lean();
   res.json(items.map(serializeResearch));
+};
+
+exports.getSiteProfile = async (req, res) => {
+  const item = await SiteProfile.findOne().lean();
+  res.json(serializeSiteProfile(item));
+};
+
+exports.updateSiteProfile = async (req, res) => {
+  const socialLinks = Array.isArray(req.body.socialLinks)
+    ? req.body.socialLinks
+        .map((link, index) => ({
+          label: normalizeString(link?.label, 60),
+          iconKey: normalizeString(link?.iconKey, 30) || 'website',
+          url: normalizeString(link?.url, 2048),
+          order: Number.isFinite(Number(link?.order)) ? Number(link.order) : index,
+        }))
+        .filter((link) => link.url)
+    : [];
+
+  const payload = {
+    siteLabel: normalizeString(req.body.siteLabel, 80),
+    fullName: normalizeString(req.body.fullName, 160),
+    professionalTitle: normalizeString(req.body.professionalTitle, 160),
+    logoImageUrl: normalizeString(req.body.logoImageUrl, 2048),
+    heroImageUrl: normalizeString(req.body.heroImageUrl, 2048),
+    aboutImageUrl: normalizeString(req.body.aboutImageUrl, 2048),
+    resumeUrl: normalizeString(req.body.resumeUrl, 2048),
+    resumeFileName: normalizeString(req.body.resumeFileName, 160) || DEFAULT_SITE_PROFILE.resumeFileName,
+    contactEmail: normalizeString(req.body.contactEmail, 160).toLowerCase(),
+    linkedinUrl: normalizeString(req.body.linkedinUrl, 2048),
+    githubUrl: normalizeString(req.body.githubUrl, 2048),
+    kaggleUrl: normalizeString(req.body.kaggleUrl, 2048),
+    socialLinks,
+    contactHeading: normalizeString(req.body.contactHeading, 120) || DEFAULT_SITE_PROFILE.contactHeading,
+    contactDescription: normalizeString(req.body.contactDescription, 1200),
+    footerText: normalizeString(req.body.footerText, 300),
+    seoTitle: normalizeString(req.body.seoTitle, 160) || DEFAULT_SITE_PROFILE.seoTitle,
+    seoDescription: normalizeString(req.body.seoDescription, 320) || DEFAULT_SITE_PROFILE.seoDescription,
+  };
+
+  if (!payload.fullName) {
+    return res.status(400).json({ message: 'Full name is required' });
+  }
+
+  if (payload.contactEmail && !EMAIL_REGEX.test(payload.contactEmail)) {
+    return res.status(400).json({ message: 'Please provide a valid contact email' });
+  }
+
+  const urlFields = ['linkedinUrl', 'githubUrl', 'kaggleUrl'];
+  const invalidUrlField = urlFields.find((field) => !isValidUrl(payload[field]));
+  if (invalidUrlField) {
+    return res.status(400).json({ message: `Invalid URL in ${invalidUrlField}` });
+  }
+
+  const invalidSocialLink = socialLinks.find(
+    (link) => !SOCIAL_ICON_KEYS.has(link.iconKey) || !isValidUrl(link.url)
+  );
+  if (invalidSocialLink) {
+    return res.status(400).json({ message: 'Invalid social link entry' });
+  }
+
+  const assetFields = ['logoImageUrl', 'heroImageUrl', 'aboutImageUrl', 'resumeUrl'];
+  const invalidAssetField = assetFields.find((field) => !isValidAssetReference(payload[field]));
+  if (invalidAssetField) {
+    return res.status(400).json({ message: `Invalid asset URL in ${invalidAssetField}` });
+  }
+
+  const updated = await SiteProfile.findOneAndUpdate(
+    {},
+    payload,
+    { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true }
+  );
+
+  return res.json(serializeSiteProfile(updated.toObject()));
+};
+
+exports.getAppearanceSettings = async (req, res) => {
+  const item = await AppearanceSettings.findOne().lean();
+  res.json(serializeAppearanceSettings(item));
+};
+
+exports.updateAppearanceSettings = async (req, res) => {
+  const paletteKey = normalizeString(req.body.paletteKey, 80) || DEFAULT_APPEARANCE_SETTINGS.paletteKey;
+  const motionPreset = normalizeString(req.body.motionPreset, 40) || DEFAULT_APPEARANCE_SETTINGS.motionPreset;
+
+  if (!APPEARANCE_PALETTE_KEYS.has(paletteKey)) {
+    return res.status(400).json({ message: 'Invalid palette option selected' });
+  }
+
+  if (!MOTION_PRESET_KEYS.has(motionPreset)) {
+    return res.status(400).json({ message: 'Invalid motion preset selected' });
+  }
+
+  const updated = await AppearanceSettings.findOneAndUpdate(
+    {},
+    { paletteKey, motionPreset },
+    { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true }
+  );
+
+  return res.json(serializeAppearanceSettings(updated.toObject()));
 };
 exports.addResearch = async (req, res) => {
   const payload = {

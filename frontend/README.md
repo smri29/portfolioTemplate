@@ -1,78 +1,114 @@
 # Frontend
 
-This frontend is the public portfolio and admin dashboard client for Shah Mohammad Rizvi.
+The frontend contains:
 
-Live site: [https://smri29net.vercel.app/](https://smri29net.vercel.app/)
+- the public single-page portfolio
+- the admin dashboard UI
+- the appearance system
+- the shared design and motion layer
 
-## Frontend Features
+## Main Entry Points
 
-- polished portfolio landing page
-- section-based storytelling for hero, intro, experience, projects, research, skills, certificates, education, hobbies, and contact
-- protected admin dashboard for full portfolio management
-- dedicated certifications page
-- responsive navigation and layout
-- subtle motion using Framer Motion
-- AI chat widget branded as `RAI`
+- `src/App.jsx`: app shell, routes, and motion config
+- `src/pages/Home.jsx`: public portfolio page
+- `src/pages/Certificates.jsx`: full certificates page
+- `src/pages/Dashboard.jsx`: admin dashboard
+- `src/context/SiteProvider.jsx`: shared site settings and appearance loading
 
-## Screenshots
+## Main Public Components
 
-### Hero Section
-![Portfolio hero](public/ss/portfolio%20first%20section.png)
+- `src/components/Navbar.jsx`
+- `src/components/Hero.jsx`
+- `src/components/About.jsx`
+- `src/components/Skills.jsx`
+- `src/components/Contact.jsx`
+- `src/components/ChatWidget.jsx`
 
-### Introduction Section
-![Portfolio introduction](public/ss/portfolio%20intro%20section.png)
+## Admin Managers
 
-### Contact Section
-![Portfolio contact](public/ss/portfolio%20contact%20section.png)
+The dashboard currently includes managers for:
 
-## Tech Stack
+- Profile
+- Appearance
+- Hero
+- Introduction
+- AI Knowledge
+- Research
+- Projects
+- Experience
+- Education
+- Certificates
+- Skills
+- Hobbies
+- Messages
 
-- React
-- Vite
-- Tailwind CSS
-- Framer Motion
-- Axios
-- React Router
-- React Toastify
+## Appearance System
 
-## Project Structure
+Appearance is driven by:
 
-```text
-frontend/
-|-- public/
-|   `-- ss/
-|-- src/
-|   |-- api/
-|   |-- assets/
-|   |-- components/
-|   `-- pages/
-|-- package.json
-`-- README.md
+- `src/theme/appearancePresets.js`
+- `src/theme/motion.js`
+- `src/index.css`
+
+The admin panel can switch:
+
+- glassmorphism color combinations
+- motion intensity and animation behavior
+
+## Placeholder Assets
+
+The template ships with neutral starter assets:
+
+- `public/template-mark.svg`
+- `public/template-hero.svg`
+- `public/template-about.svg`
+
+Screenshots used in the root README:
+
+- `public/ss/portfolio first section.png`
+- `public/ss/portfolio intro section.png`
+- `public/ss/portfolio contact section.png`
+
+## Environment
+
+Create a frontend `.env` only if needed.
+
+Expected variable:
+
+```env
+VITE_API_URL=http://localhost:5000/api
 ```
+
+If not provided, the frontend falls back to `http://localhost:5000/api`.
 
 ## Local Development
 
 ```bash
-cd frontend
 npm install
 npm run dev
 ```
 
-## Available Scripts
+## Verification
 
 ```bash
-npm run dev
-npm run build
 npm run lint
-npm run preview
+npm run build
 ```
 
-## Environment / API
+## Rebranding Flow
 
-The frontend uses the shared Axios client in `src/api/axios.js` to communicate with the backend API.
+For a new person/client, most frontend changes should happen through the admin panel rather than direct code edits.
 
-For local development, make sure the backend is running and that the backend `FRONTEND_URL` matches your local frontend URL.
+Typical order:
 
-## Deployment
+1. Update `Profile`
+2. Update `Appearance`
+3. Update `Hero`
+4. Update `Introduction`
+5. Fill the rest of the sections
 
-This frontend is intended to run on Vercel.
+## Notes
+
+- The frontend is designed to stay reusable.
+- Avoid hardcoding personal details directly into components.
+- If you need a new template-level setting, prefer adding it to the admin-controlled data layer first.

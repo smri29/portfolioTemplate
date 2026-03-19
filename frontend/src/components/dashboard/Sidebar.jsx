@@ -12,9 +12,11 @@ import {
   Cpu,
   GraduationCap,
   Heart,
+  IdCard,
   LayoutDashboard,
   LogOut,
   Mail,
+  Palette,
   Sparkles,
 } from 'lucide-react';
 
@@ -22,6 +24,8 @@ const Sidebar = ({ activeTab, setActiveTab, isCollapsed, setIsCollapsed }) => {
   const navigate = useNavigate();
 
   const menuItems = [
+    { id: 'profile', label: 'Profile', icon: <IdCard size={18} /> },
+    { id: 'appearance', label: 'Appearance', icon: <Palette size={18} /> },
     { id: 'hero', label: 'Hero', icon: <Sparkles size={18} /> },
     { id: 'introduction', label: 'Introduction', icon: <BookOpenText size={18} /> },
     { id: 'ai', label: 'AI Knowledge', icon: <Bot size={18} /> },

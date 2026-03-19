@@ -5,12 +5,12 @@ const aiSettingsSchema = new mongoose.Schema(
     assistantName: {
       type: String,
       trim: true,
-      default: 'RAI',
+      default: 'Portfolio AI',
     },
     assistantSubtitle: {
       type: String,
       trim: true,
-      default: "Rizvi's personalized AI",
+      default: 'The personalized assistant for this portfolio',
     },
     primaryGoal: {
       type: String,

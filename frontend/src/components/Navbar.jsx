@@ -2,12 +2,16 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Link } from 'react-scroll';
 import { Download, Menu, X } from 'lucide-react';
+import { useSiteContext } from '../context/useSiteContext';
+import { buildTransition } from '../theme/motion';
 
 const MotionDiv = motion.div;
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { siteProfile, appearanceSettings } = useSiteContext();
+  const motionPreset = appearanceSettings.motionPreset;
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 32);
@@ -29,11 +33,14 @@ const Navbar = () => {
     []
   );
 
+  const hasResume = Boolean(siteProfile.resumeUrl);
+  const resumeIsExternal = /^https?:\/\//i.test(siteProfile.resumeUrl || '');
+
   return (
     <nav
       className={`fixed inset-x-0 top-0 z-50 border-b transition-all duration-300 ${
         scrolled
-          ? 'border-white/10 bg-slate-900/72 py-3 backdrop-blur-xl'
+          ? 'border-white/10 bg-black/72 py-3 backdrop-blur-xl'
           : 'border-transparent bg-transparent py-5'
       }`}
     >
@@ -44,14 +51,18 @@ const Navbar = () => {
           type="button"
           aria-label="Scroll to top"
         >
-          <img src="/smr.svg" alt="SMR mark" className="h-8 w-8 rounded-md border border-cyan-300/30 bg-slate-800/65 p-1" />
+          <img
+            src={siteProfile.logoImageUrl || '/template-mark.svg'}
+            alt={`${siteProfile.fullName} mark`}
+            className="h-8 w-8 rounded-xl border border-white/15 bg-white/5 p-1 object-cover"
+          />
           <div>
-            <p className="text-[11px] uppercase tracking-[0.25em] text-cyan-300/80">Portfolio</p>
-            <p className="font-serif text-lg text-slate-100 group-hover:text-cyan-200">Shah Mohammad Rizvi</p>
+            <p className="text-[11px] uppercase tracking-[0.28em] text-slate-500">{siteProfile.siteLabel}</p>
+            <p className="font-serif text-lg text-slate-100 group-hover:text-white">{siteProfile.fullName}</p>
           </div>
         </button>
 
-        <div className="hidden items-center gap-2 rounded-full border border-white/10 bg-slate-900/32 px-3 py-2 backdrop-blur-md xl:flex">
+        <div className="hidden items-center gap-1 rounded-[22px] border border-white/10 bg-black/35 px-2 py-2 backdrop-blur-xl xl:flex">
           {links.map((link) => (
             <Link
               key={link.to}
@@ -59,8 +70,8 @@ const Navbar = () => {
               smooth
               spy
               offset={-80}
-              className="cursor-pointer rounded-full px-3 py-1.5 text-sm font-medium text-slate-300 transition-colors hover:bg-white/5 hover:text-cyan-300"
-              activeClass="text-cyan-300"
+              className="cursor-pointer rounded-[16px] px-3 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/8 hover:text-white"
+              activeClass="text-white"
             >
               {link.name}
             </Link>
@@ -68,17 +79,21 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <a
-            href="/cv.pdf"
-            download="Shah_Mohammad_Rizvi_CV.pdf"
-            className="hidden items-center gap-2 rounded-full border border-cyan-300/40 bg-cyan-300/10 px-4 py-2 text-xs font-bold uppercase tracking-wide text-cyan-200 transition hover:-translate-y-0.5 hover:border-cyan-300 hover:bg-cyan-300 hover:text-slate-950 md:inline-flex"
-          >
-            <Download size={14} />
-            Resume
-          </a>
+          {hasResume && (
+            <a
+              href={siteProfile.resumeUrl}
+              target={resumeIsExternal ? '_blank' : undefined}
+              rel={resumeIsExternal ? 'noreferrer' : undefined}
+              download={resumeIsExternal ? undefined : siteProfile.resumeFileName || true}
+              className="hidden items-center gap-2 rounded-full border border-white/15 bg-white px-4 py-2 text-xs font-bold uppercase tracking-wide text-black transition hover:-translate-y-0.5 hover:bg-slate-200 md:inline-flex"
+            >
+              <Download size={14} />
+              Resume
+            </a>
+          )}
 
           <button
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/20 text-slate-200 transition hover:border-cyan-300/60 hover:text-cyan-300 xl:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-black/35 text-slate-200 transition hover:border-white/30 hover:text-white xl:hidden"
             onClick={() => setIsOpen((prev) => !prev)}
             type="button"
             aria-label="Toggle navigation menu"
@@ -94,8 +109,8 @@ const Navbar = () => {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="border-t border-white/10 bg-slate-900/90 px-6 py-5 backdrop-blur-xl xl:hidden"
+            transition={buildTransition(motionPreset, 0.18)}
+            className="border-t border-white/10 bg-black/90 px-6 py-5 backdrop-blur-xl xl:hidden"
           >
             <div className="grid gap-4">
               {links.map((link) => (
@@ -105,7 +120,7 @@ const Navbar = () => {
                   smooth
                   offset={-74}
                   onClick={() => setIsOpen(false)}
-                  className="cursor-pointer rounded-lg border border-transparent px-3 py-2 text-slate-200 transition hover:border-cyan-300/30 hover:bg-cyan-300/10 hover:text-cyan-200"
+                  className="cursor-pointer rounded-xl border border-transparent px-3 py-2 text-slate-200 transition hover:border-white/10 hover:bg-white/5 hover:text-white"
                 >
                   {link.name}
                 </Link>

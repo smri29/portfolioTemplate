@@ -11,6 +11,8 @@ import {
   Sparkles,
 } from 'lucide-react';
 import API from '../api/axios';
+import { useSiteContext } from '../context/useSiteContext';
+import { buildTransition } from '../theme/motion';
 
 const MotionSection = motion.section;
 const MotionDiv = motion.div;
@@ -26,19 +28,21 @@ const ICON_MAP = {
 
 const FALLBACK_ABOUT = {
   introLabel: 'Introduction',
-  headingPrimary: 'Research mindset,',
-  headingAccent: 'production execution.',
+  headingPrimary: 'Build a compelling',
+  headingAccent: 'professional story.',
   description:
-    'I design and deploy AI systems that solve practical problems. My focus spans model experimentation, data-centric pipelines, and scalable MERN-based interfaces. I prioritize clean architecture, measurable outcomes, and communication that keeps engineering teams aligned.',
+    'Use this section to explain your focus, strengths, and the kind of impact you create. Keep it clear, specific, and written in your own voice.',
   highlights: [
-    { title: 'Education', detail: 'BSc in CSE, IUBAT', iconKey: 'education' },
-    { title: 'Research', detail: '7+ publications in ML and Computer Vision', iconKey: 'research' },
-    { title: 'Leadership', detail: 'Founder and President, CollabCircle', iconKey: 'leadership' },
+    { title: 'Education', detail: 'Add your degree, institution, or academic focus.', iconKey: 'education' },
+    { title: 'Research', detail: 'Highlight publications, applied work, or subject expertise.', iconKey: 'research' },
+    { title: 'Leadership', detail: 'Showcase leadership, ownership, or community building.', iconKey: 'leadership' },
   ],
 };
 
 const About = () => {
   const [content, setContent] = useState(FALLBACK_ABOUT);
+  const { siteProfile, appearanceSettings } = useSiteContext();
+  const motionPreset = appearanceSettings.motionPreset;
 
   useEffect(() => {
     const fetchIntroduction = async () => {
@@ -83,33 +87,33 @@ const About = () => {
             initial={{ opacity: 0, x: -24 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.6 }}
+            transition={buildTransition(motionPreset, 0.6)}
             className="relative"
           >
-            <div className="glass-card card-sheen overflow-hidden border-cyan-300/20 p-3">
+            <div className="glass-card card-sheen overflow-hidden border-white/10 p-3">
               <img
-                src="/smr_d.jpg"
-                alt="Shah Mohammad Rizvi portrait"
+                src={siteProfile.aboutImageUrl || '/template-about.svg'}
+                alt={`${siteProfile.fullName} portrait`}
                 className="aspect-[4/5] w-full rounded-xl object-cover"
                 loading="lazy"
               />
             </div>
-            <div className="absolute -right-4 -top-4 hidden h-24 w-24 rounded-2xl border border-amber-200/25 bg-amber-200/10 lg:block" />
-            <div className="pointer-events-none absolute -left-6 bottom-10 hidden h-20 w-20 rounded-full border border-cyan-300/15 bg-cyan-300/10 blur-xl lg:block" />
+            <div className="absolute -right-5 top-10 hidden h-40 w-px bg-gradient-to-b from-transparent via-white/25 to-transparent lg:block" />
+            <div className="pointer-events-none absolute -left-3 bottom-12 hidden h-24 w-24 rounded-full border border-white/8 bg-white/5 blur-xl lg:block" />
           </MotionDiv>
 
           <MotionDiv
             initial={{ opacity: 0, y: 22 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
+            transition={buildTransition(motionPreset, 0.6, { delay: 0.1 })}
           >
             <p className="section-kicker mb-3">
               {content.introLabel || 'Introduction'}
             </p>
             <h2 className="section-title font-serif text-4xl md:text-5xl">
               {content.headingPrimary}
-              {content.headingAccent && <span className="block text-cyan-200">{content.headingAccent}</span>}
+              {content.headingAccent && <span className="block text-slate-300">{content.headingAccent}</span>}
             </h2>
 
             <p className="mt-6 text-sm leading-relaxed text-slate-300 md:text-base">{content.description}</p>
@@ -125,10 +129,10 @@ const About = () => {
                       initial={{ opacity: 0, y: 12 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true, amount: 0.4 }}
-                      transition={{ duration: 0.35, delay: index * 0.06 }}
-                      className="glass-card card-sheen flex items-center gap-3 border-white/10 p-4 transition duration-300 hover:-translate-y-1 hover:border-cyan-300/35"
+                      transition={buildTransition(motionPreset, 0.35, { delay: index * 0.06 })}
+                      className="glass-card card-sheen flex items-center gap-3 border-white/10 p-4 transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.03]"
                     >
-                      <div className="rounded-lg border border-cyan-300/30 bg-cyan-300/10 p-2 text-cyan-200">
+                      <div className="rounded-lg border border-white/12 bg-white/5 p-2 text-slate-100">
                         <Icon size={18} />
                       </div>
                       <div>

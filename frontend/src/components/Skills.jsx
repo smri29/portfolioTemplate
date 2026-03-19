@@ -2,27 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import API from '../api/axios';
 import { ChevronDown, ChevronUp, Cpu } from 'lucide-react';
+import { useSiteContext } from '../context/useSiteContext';
+import { buildExitTransition, buildFadeUpVariant, buildStaggerVariant, buildTransition } from '../theme/motion';
 
 const MotionSection = motion.section;
 const MotionArticle = motion.article;
-
-const SECTION_VARIANTS = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.45,
-      ease: 'easeOut',
-      staggerChildren: 0.06,
-    },
-  },
-};
-
-const ITEM_VARIANTS = {
-  hidden: { opacity: 0, y: 14 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.28, ease: 'easeOut' } },
-};
 
 const PREVIEW_SKILLS_LIMIT = 6;
 
@@ -31,6 +15,13 @@ const Skills = () => {
   const [loading, setLoading] = useState(true);
   const [activeCategoryId, setActiveCategoryId] = useState(null);
   const [expandedCategories, setExpandedCategories] = useState({});
+  const { appearanceSettings } = useSiteContext();
+  const motionPreset = appearanceSettings.motionPreset;
+  const sectionVariants = useMemo(
+    () => buildStaggerVariant(motionPreset, { distance: 20, duration: 0.45, childStagger: 0.06 }),
+    [motionPreset]
+  );
+  const itemVariants = useMemo(() => buildFadeUpVariant(motionPreset, 14, 0.28), [motionPreset]);
 
   useEffect(() => {
     const fetchSkills = async () => {
@@ -95,7 +86,7 @@ const Skills = () => {
   return (
     <MotionSection
       id="skills"
-      variants={SECTION_VARIANTS}
+      variants={sectionVariants}
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.1 }}
@@ -138,10 +129,10 @@ const Skills = () => {
               {activeCategory && (
                 <MotionArticle
                   key={activeCategory._id}
-                  variants={ITEM_VARIANTS}
+                  variants={itemVariants}
                   initial="hidden"
                   animate="visible"
-                  exit={{ opacity: 0, y: -10, transition: { duration: 0.2, ease: 'easeOut' } }}
+                  exit={buildExitTransition(motionPreset, 0.2)}
                   className="glass-card card-sheen overflow-hidden border-white/10 p-0"
                 >
                   <div className="grid xl:grid-cols-[280px_1fr]">
@@ -176,7 +167,7 @@ const Skills = () => {
                             key={`${activeCategory._id}-${skill}-${idx}`}
                             initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.22, ease: 'easeOut', delay: idx * 0.02 }}
+                            transition={buildTransition(motionPreset, 0.22, { delay: idx * 0.02 })}
                             className="rounded-2xl border border-white/10 bg-slate-800/45 px-4 py-3 text-sm text-slate-200 transition duration-300 hover:-translate-y-0.5 hover:border-cyan-300/25 hover:bg-slate-800/65"
                           >
                             <span className="inline-flex items-center gap-2">

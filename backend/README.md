@@ -1,63 +1,78 @@
 # Backend
 
-This backend powers the portfolio website, admin dashboard, contact workflow, and the `RAI` chatbot.
+The backend powers:
 
-## What It Handles
+- admin authentication
+- CRUD APIs for portfolio content
+- appearance settings
+- AI assistant settings and context assembly
+- contact form storage and email forwarding
 
-- admin authentication with JWT
-- public portfolio data APIs
-- protected admin CRUD APIs
-- contact form delivery and inbox storage
-- AI chat endpoint
-- Cloudinary project image handling
-- MongoDB persistence for all portfolio sections
+## Main Files
 
-## Main Stack
+- `server.js`: app bootstrap, CORS, routes, health endpoint
+- `controllers/dataController.js`: content CRUD and template settings
+- `controllers/aiController.js`: AI assistant logic
+- `routes/dataRoutes.js`: public and protected data routes
+- `routes/authRoutes.js`: authentication routes
 
-- Node.js
-- Express
-- Mongoose
-- JWT
-- Nodemailer
-- Google Gemini
-- Cloudinary
+## Models
 
-## Important Files
+Core models include:
 
-```text
-backend/
-|-- config/
-|   |-- cloudinary.js
-|   `-- db.js
-|-- controllers/
-|   |-- aiController.js
-|   |-- authController.js
-|   `-- dataController.js
-|-- middleware/
-|   `-- authMiddleware.js
-|-- models/
-|-- routes/
-|   |-- authRoutes.js
-|   `-- dataRoutes.js
-|-- .env.sample
-`-- server.js
-```
+- `SiteProfile`
+- `AppearanceSettings`
+- `HeroContent`
+- `Introduction`
+- `AISettings`
+- `Project`
+- `Research`
+- `Experience`
+- `Education`
+- `Certificate`
+- `Skill`
+- `Hobby`
+- `Message`
+- `User`
 
-## Environment Variables
+## Environment Setup
 
-Use [.env.sample](.env.sample) as the template.
+Use `backend/.env.sample` as the starting point.
+
+Minimum required values:
+
+- `MONGO_URI`
+- `JWT_SECRET`
+
+Recommended values:
+
+- `ADMIN_EMAIL`
+- `ADMIN_PASSWORD`
+- `FRONTEND_URL`
+- `FRONTEND_URLS`
+- `GEMINI_API_KEY`
+- email settings
+- Cloudinary settings
+
+## Important Variables
 
 ```env
 PORT=
 MONGO_URI=
+JWT_SECRET=
 GEMINI_API_KEY=
+GEMINI_MODEL=gemini-2.5-flash
 
 EMAIL_SERVICE=
-EMAIL_USER=
+EMAIL_HOST=
+EMAIL_PORT=
+EMAIL_SECURE=
+EMAIL_USER=portfolio@example.com
 EMAIL_PASS=
-EMAIL_RECEIVER=
+EMAIL_RECEIVER=owner@example.com
 
-FRONTEND_URL=
+FRONTEND_URL=http://localhost:5173
+FRONTEND_URLS=http://localhost:5173,https://your-frontend-domain.vercel.app
 
 ADMIN_EMAIL=
 ADMIN_PASSWORD=
@@ -65,52 +80,80 @@ ADMIN_PASSWORD=
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
+CLOUDINARY_FOLDER=portfolio-template/projects
 ```
 
 ## Local Development
 
 ```bash
-cd backend
 npm install
-copy .env.sample .env
 npm run dev
 ```
 
-The API starts from `server.js`.
+The API health endpoint is:
 
-## Available Scripts
+```text
+GET /api/health
+```
+
+## Public Routes
+
+Examples:
+
+- `GET /api/data/profile`
+- `GET /api/data/appearance`
+- `GET /api/data/hero`
+- `GET /api/data/introduction`
+- `GET /api/data/projects`
+- `GET /api/data/research`
+- `GET /api/data/certificates`
+- `GET /api/data/experience`
+- `GET /api/data/education`
+- `GET /api/data/skills`
+- `GET /api/data/hobbies`
+- `GET /api/data/ai-public`
+- `POST /api/data/contact`
+- `POST /api/data/chat`
+
+## Protected Routes
+
+Examples:
+
+- `POST /api/data/profile`
+- `POST /api/data/appearance`
+- `POST /api/data/hero`
+- `POST /api/data/introduction`
+- `GET /api/data/ai-settings`
+- `POST /api/data/ai-settings`
+- project, research, experience, education, certificate, hobby, and skill management routes
+- `PUT /api/data/reorder`
+- inbox delete routes
+
+## Verification
+
+Static verification:
 
 ```bash
-npm run dev
-npm start
+node --check server.js
+node --check controllers/dataController.js
+node --check controllers/aiController.js
+node --check routes/dataRoutes.js
 ```
 
-## Backend Responsibilities
+Runtime verification:
 
-### Authentication
+1. Fill `MONGO_URI` and `JWT_SECRET`
+2. Start the server
+3. Open `GET /api/health`
+4. Verify the public data routes respond
 
-- admin login
-- JWT token generation
-- protected admin routes
+## Handoff Guidance
 
-### Content Management
+When creating a new portfolio for another person:
 
-- hero content
-- introduction content
-- research publications
-- technical projects
-- work experience
-- education
-- professional certificates
-- skills
-- hobbies and interests
-- AI knowledge settings
-- recruiter messages
+- use a separate database for that person
+- use separate deploy environments
+- use separate Cloudinary folders or accounts if needed
+- create separate admin credentials
 
-### AI
-
-The chat endpoint builds its knowledge from admin-managed data instead of relying on hardcoded profile text. This allows portfolio updates to be reflected in the assistant without editing source code.
-
-## Deployment
-
-This backend is intended to run on Render. Make sure the environment variables from `.env.sample` are configured in the Render dashboard.
+That keeps one client or friend from affecting another person's site.

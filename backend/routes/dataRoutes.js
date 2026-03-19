@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
-const { chatWithAI, getAISettings, updateAISettings } = require('../controllers/aiController');
+const { chatWithAI, getAISettings, getPublicAISettings, updateAISettings } = require('../controllers/aiController');
 const {
     getProjects, addProject, updateProject, deleteProject,
     getResearch, addResearch, updateResearch, deleteResearch,
     getCertificates, addCertificate, updateCertificate, deleteCertificate,
+    getSiteProfile, updateSiteProfile,
+    getAppearanceSettings, updateAppearanceSettings,
     getHeroContent, updateHeroContent,
     getIntroduction, updateIntroduction,
     getSkills, updateSkills, deleteSkill,
@@ -19,12 +21,15 @@ const {
 router.get('/projects', getProjects);
 router.get('/research', getResearch);
 router.get('/certificates', getCertificates);
+router.get('/profile', getSiteProfile);
+router.get('/appearance', getAppearanceSettings);
 router.get('/hero', getHeroContent);
 router.get('/introduction', getIntroduction);
 router.get('/skills', getSkills);
 router.get('/experience', getExperience); // NEW
 router.get('/education', getEducation);
 router.get('/hobbies', getHobbies);       // NEW
+router.get('/ai-public', getPublicAISettings);
 router.post('/contact', sendMessage);
 router.post('/chat', chatWithAI);
 
@@ -41,6 +46,8 @@ router.route('/projects/:id').put(protect, updateProject).delete(protect, delete
 router.route('/certificates').post(protect, addCertificate);
 router.route('/certificates/:id').put(protect, updateCertificate).delete(protect, deleteCertificate);
 
+router.route('/profile').post(protect, updateSiteProfile);
+router.route('/appearance').post(protect, updateAppearanceSettings);
 router.route('/hero').post(protect, updateHeroContent);
 router.route('/introduction').post(protect, updateIntroduction);
 router.route('/ai-settings').get(protect, getAISettings).post(protect, updateAISettings);
